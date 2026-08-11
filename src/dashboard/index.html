@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MemPeek · 零 token 记忆回看</title>
+  <meta name="color-scheme" content="dark light" />
+  <style>
+    :root {
+      --bg: #1d1d1f;
+      --bg-soft: #232326;
+      --card: #26262a;
+      --border: #3a3a44;
+      --text: #f5f5f7;
+      --muted: #a1a1a8;
+      --primary: #4da3ff;
+      --purple: #8985ff;
+      --teal: #2dc79a;
+      --amber: #f0b441;
+      --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", monospace;
+      --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
+    body { min-height: 100vh; padding: 24px clamp(16px, 4vw, 48px) 64px; }
+    a { color: var(--primary); }
+    .lang-toggle { float: right; user-select: none; }
+    .lang-toggle button { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 2px 8px; cursor: pointer; font-size: 12px; margin-left: 6px; }
+    .lang-toggle button.active { color: var(--text); border-color: var(--primary); }
+    html[lang="en"] [data-zh], html[lang="en"] .zh { display: none !important; }
+    html[lang="zh-CN"] [data-en], html[lang="zh-CN"] .en { display: none !important; }
+    header.top { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+    header.top h1 { font-size: 26px; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+    header.top h1 .dot { color: var(--teal); }
+    header.top .sub { color: var(--muted); font-size: 14px; }
+    .conn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); margin-left: auto; }
+    .conn .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 0 rgba(240,180,65,0.6); }
+    .conn.live .pip { background: var(--teal); animation: pulse 2s infinite; }
+    .conn.down .pip { background: #ff6b6b; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(45,199,154,0.5); } 70% { box-shadow: 0 0 0 8px rgba(45,199,154,0); } 100% { box-shadow: 0 0 0 0 rgba(45,199,154,0); } }
+
+    .hero {
+      display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center;
+      margin: 24px 0; padding: 24px 28px; background: linear-gradient(135deg, rgba(137,133,255,0.10), rgba(45,199,154,0.06));
+      border: 1px solid var(--border); border-radius: 18px;
+    }
+    .hero .label { color: var(--muted); font-size: 13px; }
+    .hero .num { font-size: 56px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: var(--text); }
+    .hero .num .unit { font-size: 18px; color: var(--muted); margin-left: 8px; font-weight: 500; }
+    .hero .spark { width: 320px; height: 64px; display: block; }
+
+    .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-top: 20px; }
+    @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } .hero .spark { width: 100%; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .card header { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+    .card header h2 { margin: 0; font-size: 15px; font-weight: 600; }
+    .card header .ic { width: 18px; height: 18px; }
+    .card header .count { margin-left: auto; font-size: 12px; color: var(--muted); background: var(--bg-soft); border: 1px solid var(--border); border-radius: 999px; padding: 2px 10px; }
+    .card .body { padding: 8px; max-height: 520px; overflow-y: auto; }
+    .empty { color: var(--muted); font-size: 13px; padding: 24px; text-align: center; }
+
+    .row { padding: 10px 12px; border-radius: 10px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start; }
+    .row:hover { background: var(--bg-soft); }
+    .row .content { font-size: 13px; color: var(--text); line-height: 1.45; word-break: break-word; }
+    .row .meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+    .row .score { font-family: var(--mono); font-size: 11px; color: var(--teal); }
+    .badge { font-size: 10px; padding: 1px 7px; border-radius: 999px; border: 1px solid; }
+    .badge.ctx { color: var(--amber); border-color: rgba(240,180,65,0.5); background: rgba(240,180,65,0.08); }
+    .badge.recall { color: var(--purple); border-color: rgba(137,133,255,0.5); background: rgba(137,133,255,0.08); }
+
+    .flash { animation: flash 1.1s ease; }
+    @keyframes flash { 0% { background: rgba(77,163,255,0.22); } 100% { background: transparent; } }
+
+    .footer { color: var(--muted); font-size: 12px; margin-top: 32px; text-align: center; }
+    .footer a { color: var(--muted); text-decoration: none; }
+    code { font-family: var(--mono); font-size: 12px; background: var(--bg-soft); padding: 1px 6px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="lang-toggle">
+    <button id="lang-zh" class="active">中文</button>
+    <button id="lang-en">EN</button>
+  </div>
+
+  <header class="top">
+    <h1>MemPeek<span class="dot">.</span></h1>
+    <span class="sub">
+      <span class="zh">零 token 记忆回看 · 你的 agent 记得什么，不占上下文就能看见</span>
+      <span class="en">Zero-token memory readback · what your agent knows, without bloating context</span>
+    </span>
+    <span class="conn" id="conn"><span class="pip"></span><span id="conn-text">connecting…</span></span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <div class="label">
+        <span class="zh">累计节省 token</span>
+        <span class="en">Tokens saved (cumulative)</span>
+      </div>
+      <div class="num" id="saved-num">0<span class="unit">tokens</span></div>
+      <div class="label" id="saved-count" style="margin-top:8px;">0 readbacks</div>
+    </div>
+    <canvas class="spark" id="spark" width="640" height="128" aria-label="savings sparkline"></canvas>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <header>
+        <img class="ic" src="https://api.iconify.design/tabler:list-details.svg?color=%234DA3FF&width=18" alt="">
+        <h2><span class="zh">回看列表</span><span class="en">Recall list</span></h2>
+        <span class="count" id="recall-count">0</span>
+      </header>
+      <div class="body" id="recall-list"><div class="empty"><span class="zh">还没有记忆。agent 调用 <code>mempeek.write</code> 写入后会出现在这里。</span><span class="en">No memories yet. Entries appear here after the agent calls <code>mempeek.write</code>.</span></div></div>
+    </div>
+
+    <div class="card">
+      <header>
+        <img class="ic" src="https://api.iconify.design/tabler:pin.svg?color=%23F0B441&width=18" alt="">
+        <h2><span class="zh">上下文中</span><span class="en">In context</span></h2>
+        <span class="count" id="ctx-count">0</span>
+      </header>
+      <div class="body" id="ctx-list"><div class="empty"><span class="zh">agent 标记为 <code>in_context:true</code> 的条目会显示在这里。</span><span class="en">Entries the agent flagged <code>in_context:true</code> show up here.</span></div></div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <span class="zh">本地仪表盘 · <code>localhost:7331</code> · 数据仅存于本机</span>
+    <span class="en">Local dashboard · <code>localhost:7331</code> · data never leaves your machine</span>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+{
+  "name": "mempeek",
+  "version": "0.1.0",
+  "description": "Zero-token memory readback for AI agents — MCP server + local dashboard.",
+  "type": "module",
+  "license": "MIT",
+  "author": "SuperMarioYL",
+  "homepage": "https://github.com/SuperMarioYL/mempeek",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SuperMarioYL/mempeek.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SuperMarioYL/mempeek/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "agent-memory",
+    "zero-token",
+    "readback",
+    "claude-code",
+    "cursor",
+    "context-window",
+    "dashboard"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "mempeek": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "README.en.md",
+    "LICENSE",
+    "assets",
+    "docs"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "demo": "tsx src/index.ts --demo",
+    "demo:record": "vhs docs/demo.tape",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist *.db *.db-journal"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.0.0",
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

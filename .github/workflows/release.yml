@@ -1,0 +1,55 @@
+name: release
+# Builds a distributable npm tarball + checksums on tag v*.*.*.
+# publish_repo.sh attaches the staged artifacts to the GitHub Release.
+# The optional npm-publish job is OPT-IN: set repo variable NPM_PUBLISH=true
+# and configure an NPM_TOKEN secret before a fresh repo's first publish,
+# otherwise it stays skipped (keeps the first release green).
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm install
+      - run: npm run build
+      - name: npm pack into dist/
+        run: |
+          mkdir -p dist
+          npm pack --pack-destination=dist
+      - name: Generate checksums
+        run: |
+          cd dist
+          shasum -a 256 *.tgz > checksums.txt
+          cat checksums.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            dist/*.tgz
+            dist/checksums.txt
+
+  npm-publish:
+    if: startsWith(github.ref, 'refs/tags/v') && vars.NPM_PUBLISH == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install
+      - run: npm run build
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
