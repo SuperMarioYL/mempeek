@@ -17,5 +17,7 @@ jobs:
       - run: npm install
       - run: npm run typecheck
       - run: npm run build
+      - name: MCP stdio end-to-end test
+        run: node test/mcp-stdio.test.mjs
       - name: Smoke-test the demo
         run: node dist/index.js --demo

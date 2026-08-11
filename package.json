@@ -45,6 +45,7 @@
     "start": "node dist/index.js",
     "demo": "tsx src/index.ts --demo",
     "demo:record": "vhs docs/demo.tape",
+    "test": "node test/mcp-stdio.test.mjs",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist *.db *.db-journal"
   },
