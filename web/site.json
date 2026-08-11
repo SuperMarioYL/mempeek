@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "mempeek",
+  "github": "https://github.com/SuperMarioYL/mempeek",
+  "host": "mempeek.lei6393.com",
+  "lang": { "primary": "zh", "toggle": true },
+  "accent": ["#6366f1", "#818cf8", "#a5b4fc"],
+  "hero": {
+    "eyebrow": { "zh": "本地 · 零 token · 实时回看", "en": "Local · Zero-token · Live recall" },
+    "headline": {
+      "zh": "你的 AI agent 记住了什么\n打开仪表盘一眼看清",
+      "en": "See what your AI agent remembers\nwithout spending a single token"
+    },
+    "sub": {
+      "zh": "MemPeek 让 agent 把记忆写到本地侧信道，模型只收到一张固定大小的回执——完整记忆在仪表盘里实时呈现。",
+      "en": "MemPeek writes memories to a local side-channel; the model gets only a fixed-size receipt — full recall appears live on your dashboard."
+    },
+    "command": "npx mempeek",
+    "cta": { "zh": "开始使用", "en": "Get started" },
+    "ctaGithub": { "zh": "GitHub", "en": "GitHub" },
+    "scroll": { "zh": "向下看", "en": "Scroll" }
+  },
+  "advantages": [
+    {
+      "title": { "zh": "回看记忆不花 token", "en": "Recall memory without burning tokens" },
+      "body": {
+        "zh": "每次 agent 回看记忆，模型上下文里只多一张固定大小的回执，完整内容走本地侧信道——长会话不再被记忆撑爆。",
+        "en": "Every recall sends the model only a fixed-size receipt; the full content travels a local side-channel — long sessions no longer overflow the context window."
+      },
+      "chips": ["› O(1) 回执，不随记忆增长", "› 完整内容在侧信道", "› 支持 Claude Code / Cursor"]
+    },
+    {
+      "title": { "zh": "一眼看清省了多少", "en": "See exactly how much you saved" },
+      "body": {
+        "zh": "仪表盘实时显示 token 节省量、当前注入的记忆条目、以及完整回看列表——数字会说话。",
+        "en": "The dashboard shows live token savings, in-context items, and the full recall list — the numbers speak for themselves."
+      },
+      "chips": ["› 实时节省计数器", "› 注入 vs 回看分栏", "› 趋势火花线图"]
+    },
+    {
+      "title": { "zh": "全部留在你的机器上", "en": "Everything stays on your machine" },
+      "body": {
+        "zh": "记忆存在本地 SQLite，仪表盘跑在 localhost——不连云、不上传、不需要账号。",
+        "en": "Memories live in local SQLite, the dashboard runs on localhost — no cloud, no upload, no account."
+      },
+      "chips": ["› 本地 SQLite 存储", "› localhost 仪表盘", "› 零外部依赖"]
+    },
+    {
+      "title": { "zh": "一条命令装进你的 agent", "en": "One command into your agent" },
+      "body": {
+        "zh": "通过 MCP 协议接入，Claude Code 或 Cursor 配一行就能用——不用改你的工作流。",
+        "en": "Plugs in via MCP — add one line to Claude Code or Cursor and you're running, no workflow changes."
+      },
+      "chips": ["› MCP stdio 协议", "› mempeek.write / mempeek.readback", "› 无需改工作流"]
+    }
+  ],
+  "scene": { "kind": "mesh", "nodes": ["memory-store", "side-channel", "dashboard", "MCP"] },
+  "cta": {
+    "headline": { "zh": "让 agent 的记忆不再是黑盒", "en": "Make agent memory an open book" },
+    "sub": { "zh": "本地运行，零 token 回看，实时仪表盘。", "en": "Local, zero-token recall, live dashboard." },
+    "button": { "zh": "立即试用", "en": "Try it now" }
+  },
+  "footer": { "tag": { "zh": "MIT 开源 · 本地优先", "en": "MIT open source · local-first" } }
+}
