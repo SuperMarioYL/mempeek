@@ -1,0 +1,17 @@
+{
+  "version": "0.1.0",
+  "scope": "SQLite storage, explicit-session similarity recall and in-process SSE event delivery for two synthetic memories. No model is called; token_saved is a heuristic content estimate, not billing or net savings.",
+  "inputs": [
+    {
+      "path": "examples/presentation-demo.mjs",
+      "sha256": "ec9f0f16f8f3c643565cb0312b6eca23e7c6dcc1f150f3b32d0769a8bec97c05"
+    }
+  ],
+  "steps": [
+    {
+      "command": "node examples/presentation-demo.mjs",
+      "output": "{\n  \"model_receipt\": {\n    \"found\": 1,\n    \"displayed\": true,\n    \"token_saved\": 7,\n    \"side_channel\": \"local-demo\"\n  },\n  \"side_channel_content\": [\n    \"deployment uses port 8080\"\n  ],\n  \"receipt_contains_full_content\": false\n}\n",
+      "exit_code": 0
+    }
+  ]
+}

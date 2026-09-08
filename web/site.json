@@ -1,64 +1,236 @@
 {
-  "schema": 1,
-  "name": "mempeek",
+  "schema": 3,
+  "name": "MemPeek",
   "github": "https://github.com/SuperMarioYL/mempeek",
   "host": "mempeek.lei6393.com",
-  "lang": { "primary": "zh", "toggle": true },
-  "accent": ["#6366f1", "#818cf8", "#a5b4fc"],
+  "palette": "auto",
+  "lang": {
+    "primary": "zh",
+    "toggle": true
+  },
+  "meta": {
+    "visual_profile": "neon-particle",
+    "content_version": "0.1.0",
+    "demo_source": "docs/demo-results.json"
+  },
   "hero": {
-    "eyebrow": { "zh": "本地 · 零 token · 实时回看", "en": "Local · Zero-token · Live recall" },
+    "eyebrow": {
+      "zh": "完整召回内容送到本地仪表盘，MCP 返回精简回执，让人可以检查记忆而不把全文重复塞进模型上下文。",
+      "en": "Send full recalls to a local dashboard and return compact MCP receipts, so people can review memories without repeating their full text in model context."
+    },
     "headline": {
-      "zh": "你的 AI agent 记住了什么\n打开仪表盘一眼看清",
-      "en": "See what your AI agent remembers\nwithout spending a single token"
+      "zh": "在本地界面回看召回的记忆。",
+      "en": "Review recalled memories locally."
     },
     "sub": {
-      "zh": "MemPeek 让 agent 把记忆写到本地侧信道，模型只收到一张固定大小的回执——完整记忆在仪表盘里实时呈现。",
-      "en": "MemPeek writes memories to a local side-channel; the model gets only a fixed-size receipt — full recall appears live on your dashboard."
+      "zh": "完整召回内容送到本地仪表盘，MCP 返回精简回执，让人可以检查记忆而不把全文重复塞进模型上下文。",
+      "en": "Send full recalls to a local dashboard and return compact MCP receipts, so people can review memories without repeating their full text in model context."
     },
-    "command": "npx mempeek",
-    "cta": { "zh": "开始使用", "en": "Get started" },
-    "ctaGithub": { "zh": "GitHub", "en": "GitHub" },
-    "scroll": { "zh": "向下看", "en": "Scroll" }
+    "href": "#quickstart",
+    "cta": {
+      "zh": "运行示例",
+      "en": "Run the example"
+    },
+    "ctaGithub": {
+      "zh": "查看源码",
+      "en": "View source"
+    }
+  },
+  "scene": {
+    "kind": "neon-graph",
+    "caption": {
+      "zh": "图示展示组件关系；实际输出见下方示例。",
+      "en": "An illustrative component scene; recorded output appears below."
+    },
+    "fallback": "/assets/presentation/scene-dark.svg",
+    "fallbackLight": "/assets/presentation/scene-light.svg"
   },
   "advantages": [
     {
-      "title": { "zh": "回看记忆不花 token", "en": "Recall memory without burning tokens" },
-      "body": {
-        "zh": "每次 agent 回看记忆，模型上下文里只多一张固定大小的回执，完整内容走本地侧信道——长会话不再被记忆撑爆。",
-        "en": "Every recall sends the model only a fixed-size receipt; the full content travels a local side-channel — long sessions no longer overflow the context window."
+      "title": {
+        "zh": "人可直接回看",
+        "en": "Human-readable recall"
       },
-      "chips": ["› O(1) 回执，不随记忆增长", "› 完整内容在侧信道", "› 支持 Claude Code / Cursor"]
+      "body": {
+        "zh": "全文走本地显示路径。",
+        "en": "Full text follows the local display route."
+      }
     },
     {
-      "title": { "zh": "一眼看清省了多少", "en": "See exactly how much you saved" },
-      "body": {
-        "zh": "仪表盘实时显示 token 节省量、当前注入的记忆条目、以及完整回看列表——数字会说话。",
-        "en": "The dashboard shows live token savings, in-context items, and the full recall list — the numbers speak for themselves."
+      "title": {
+        "zh": "精简工具返回",
+        "en": "Compact tool result"
       },
-      "chips": ["› 实时节省计数器", "› 注入 vs 回看分栏", "› 趋势火花线图"]
+      "body": {
+        "zh": "模型收到固定字段结构。",
+        "en": "The model receives a fixed field structure."
+      }
     },
     {
-      "title": { "zh": "全部留在你的机器上", "en": "Everything stays on your machine" },
-      "body": {
-        "zh": "记忆存在本地 SQLite，仪表盘跑在 localhost——不连云、不上传、不需要账号。",
-        "en": "Memories live in local SQLite, the dashboard runs on localhost — no cloud, no upload, no account."
+      "title": {
+        "zh": "自己管理数据",
+        "en": "Own local storage"
       },
-      "chips": ["› 本地 SQLite 存储", "› localhost 仪表盘", "› 零外部依赖"]
-    },
-    {
-      "title": { "zh": "一条命令装进你的 agent", "en": "One command into your agent" },
       "body": {
-        "zh": "通过 MCP 协议接入，Claude Code 或 Cursor 配一行就能用——不用改你的工作流。",
-        "en": "Plugs in via MCP — add one line to Claude Code or Cursor and you're running, no workflow changes."
-      },
-      "chips": ["› MCP stdio 协议", "› mempeek.write / mempeek.readback", "› 无需改工作流"]
+        "zh": "SQLite 和向量可由调用方控制。",
+        "en": "Callers control SQLite and supplied vectors."
+      }
     }
   ],
-  "scene": { "kind": "mesh", "nodes": ["memory-store", "side-channel", "dashboard", "MCP"] },
-  "cta": {
-    "headline": { "zh": "让 agent 的记忆不再是黑盒", "en": "Make agent memory an open book" },
-    "sub": { "zh": "本地运行，零 token 回看，实时仪表盘。", "en": "Local, zero-token recall, live dashboard." },
-    "button": { "zh": "立即试用", "en": "Try it now" }
+  "story": {
+    "intro": {
+      "title": {
+        "zh": "解决什么问题",
+        "en": "The task it solves"
+      },
+      "body": {
+        "zh": "检查 Agent 记住了什么与让模型重新读取这些记忆，是两种不同操作。MemPeek 为前者提供本地回看路径：把命中的内容显示给人，模型拿到条数和地址等回执。模型若需要利用记忆全文，仍需由调用方另行提供。",
+        "en": "Inspecting what an agent remembers and asking a model to reason over those memories are different operations. MemPeek provides a local readback route for inspection: people receive the matching content while the model gets counts and a location receipt. If the model needs the text for reasoning, the caller must provide it separately."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "zh": "从输入到结果",
+          "en": "From input to result"
+        },
+        "body": {
+          "zh": "脚本向临时 SQLite 写入两条记忆，显式按 demo 会话召回一条，并通过进程内 SSEBus 收到全文。没有启动模型或浏览器仪表盘。token_saved 是启发式内容估算。",
+          "en": "The script writes two memories to temporary SQLite, explicitly scopes recall to the demo session and delivers full text through an in-process SSEBus. It starts no model or browser dashboard. token_saved is a heuristic content estimate."
+        },
+        "image": {
+          "light": "/assets/presentation/process-light.svg",
+          "dark": "/assets/presentation/process-dark.svg",
+          "alt": {
+            "zh": "脚本向临时 SQLite 写入两条记忆，显式按 demo 会话召回一条，并通过进程内 SSEBus 收到全文。没有启动模型或浏览器仪表盘。token_saved 是启发式内容估算。",
+            "en": "The script writes two memories to temporary SQLite, explicitly scopes recall to the demo session and delivers full text through an in-process SSEBus. It starts no model or browser dashboard. token_saved is a heuristic content estimate."
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "工作原理",
+          "en": "How it works"
+        },
+        "body": {
+          "zh": "MemoryStore 将内容与向量写入 SQLite，按 cosine 相似度召回。MCP readback 将精简条目发布到 SSEBus，仪表盘经 HTTP/SSE 接收；回执只包含 found、displayed、token_saved、side_channel。默认向量来自哈希词袋，调用方也可提供向量。",
+          "en": "MemoryStore persists text and vectors in SQLite and recalls by cosine similarity. MCP readback publishes lean entries through SSEBus to the HTTP/SSE dashboard. The receipt contains found, displayed, token_saved and side_channel. Default vectors are hashed bags of words; callers can supply their own."
+        },
+        "image": {
+          "light": "/assets/presentation/architecture-light.svg",
+          "dark": "/assets/presentation/architecture-dark.svg",
+          "alt": {
+            "zh": "MemoryStore 将内容与向量写入 SQLite，按 cosine 相似度召回。MCP readback 将精简条目发布到 SSEBus，仪表盘经 HTTP/SSE 接收；回执只包含 found、displayed、token_saved、side_channel。默认向量来自哈希词袋，调用方也可提供向量。",
+            "en": "MemoryStore persists text and vectors in SQLite and recalls by cosine similarity. MCP readback publishes lean entries through SSEBus to the HTTP/SSE dashboard. The receipt contains found, displayed, token_saved and side_channel. Default vectors are hashed bags of words; callers can supply their own."
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "能力与接入",
+          "en": "Capabilities and integration"
+        },
+        "body": {
+          "zh": "默认同一进程运行 MCP stdio 与仪表盘，也可单独启用一侧。session_id 用于查询过滤，in_context 是调用方标记，不是对 Agent 实际上下文的自动探测。",
+          "en": "MCP stdio and the dashboard normally share one process; either can run alone. session_id filters queries and in_context is a caller-supplied label, not automatic inspection of the agent’s actual context."
+        },
+        "image": {
+          "light": "/assets/presentation/integrations-light.svg",
+          "dark": "/assets/presentation/integrations-dark.svg",
+          "alt": {
+            "zh": "默认同一进程运行 MCP stdio 与仪表盘，也可单独启用一侧。session_id 用于查询过滤，in_context 是调用方标记，不是对 Agent 实际上下文的自动探测。",
+            "en": "MCP stdio and the dashboard normally share one process; either can run alone. session_id filters queries and in_context is a caller-supplied label, not automatic inspection of the agent’s actual context."
+          }
+        }
+      }
+    ],
+    "details": [
+      {
+        "title": {
+          "zh": "使用方式",
+          "en": "Usage"
+        },
+        "body": {
+          "zh": "默认同一进程运行 MCP stdio 与仪表盘，也可单独启用一侧。session_id 用于查询过滤，in_context 是调用方标记，不是对 Agent 实际上下文的自动探测。",
+          "en": "MCP stdio and the dashboard normally share one process; either can run alone. session_id filters queries and in_context is a caller-supplied label, not automatic inspection of the agent’s actual context."
+        }
+      },
+      {
+        "title": {
+          "zh": "配置",
+          "en": "Configuration"
+        },
+        "body": {
+          "zh": "`--db=mempeek.db`、`--port=7331`、`--host=127.0.0.1`、`--session=default` 控制运行位置。`--http-only`/`--mcp-only` 选择传输；embedding 可提供给写入与查询。回执的 displayed 标志不是浏览器已阅读或成功渲染的确认。",
+          "en": "`--db=mempeek.db`, `--port=7331`, `--host=127.0.0.1` and `--session=default` control runtime placement. `--http-only`/`--mcp-only` select transports. Embeddings can be supplied to writes and queries. The receipt’s displayed flag is not an acknowledgement that a browser rendered or a person read the content."
+        }
+      }
+    ]
   },
-  "footer": { "tag": { "zh": "MIT 开源 · 本地优先", "en": "MIT open source · local-first" } }
+  "demo": {
+    "title": {
+      "zh": "实际运行结果",
+      "en": "Actual demo output"
+    },
+    "note": {
+      "zh": "脚本向临时 SQLite 写入两条记忆，显式按 demo 会话召回一条，并通过进程内 SSEBus 收到全文。没有启动模型或浏览器仪表盘。token_saved 是启发式内容估算。",
+      "en": "The script writes two memories to temporary SQLite, explicitly scopes recall to the demo session and delivers full text through an in-process SSEBus. It starts no model or browser dashboard. token_saved is a heuristic content estimate."
+    },
+    "source": "https://github.com/SuperMarioYL/mempeek/blob/main/docs/demo-results.json",
+    "steps": [
+      {
+        "label": {
+          "zh": "查看分开的返回值",
+          "en": "Inspect the split return"
+        },
+        "body": {
+          "zh": "model_receipt 不含全文，side_channel_content 包含匹配的记忆。",
+          "en": "model_receipt omits full text while side_channel_content contains the matching memory."
+        },
+        "command": "node examples/presentation-demo.mjs",
+        "output": "{\n  \"model_receipt\": {\n    \"found\": 1,\n    \"displayed\": true,\n    \"token_saved\": 7,\n    \"side_channel\": \"local-demo\"\n  },\n  \"side_channel_content\": [\n    \"deployment uses port 8080\"\n  ],\n  \"receipt_contains_full_content\": false\n}\n",
+        "image": "/assets/presentation/demo-0-light.svg",
+        "imageDark": "/assets/presentation/demo-0-dark.svg"
+      }
+    ]
+  },
+  "quickstart": {
+    "title": {
+      "zh": "从完整输入开始",
+      "en": "Start with complete input"
+    },
+    "body": {
+      "zh": "需要 Node.js 22+。better-sqlite3 需要匹配本机 Node 的二进制；如果安装时没有可用预构建包，需要本机编译工具。",
+      "en": "Requires Node.js 22+. better-sqlite3 needs a binary matching the local Node runtime; native build tools are required if no prebuilt binary is available."
+    },
+    "steps": [
+      {
+        "title": {
+          "zh": "安装",
+          "en": "Install"
+        },
+        "code": "git clone https://github.com/SuperMarioYL/mempeek.git\ncd mempeek\nnpm ci\nnpm run build"
+      },
+      {
+        "title": {
+          "zh": "运行自带示例",
+          "en": "Run the supplied example"
+        },
+        "code": "node examples/presentation-demo.mjs"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "zh": "回执本身会占用 token；token_saved 未扣除回执，也不是实测账单或净节省。",
+      "en": "Receipts themselves consume tokens; token_saved does not subtract receipt cost and is not measured billing or net savings."
+    },
+    {
+      "zh": "默认哈希向量不是语义模型；未传 session_id 的召回可能遍历多个会话。",
+      "en": "The default hashed vectorizer is not a semantic model; recall without session_id can span multiple sessions."
+    }
+  ],
+  "footer": {
+    "tag": "0.1.0 · Node.js 22+ · MIT"
+  }
 }

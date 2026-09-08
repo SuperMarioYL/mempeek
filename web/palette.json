@@ -1,0 +1,38 @@
+{
+  "mode": "auto",
+  "id": "bb56e6-e76aca-c5acf6-7319122af072",
+  "identity": "https://github.com/supermarioyl/mempeek",
+  "primary": "#bb56e6",
+  "secondary": "#e76aca",
+  "highlight": "#c5acf6",
+  "dark": {
+    "bg": "#080712",
+    "panel": "#11101f",
+    "code": "#110d1d",
+    "ink": "#f3eefd",
+    "muted": "#a99cc4",
+    "line": "#2f1841",
+    "primary": "#bb56e6",
+    "secondary": "#e76aca",
+    "highlight": "#c5acf6",
+    "accent": "#bb56e6",
+    "buttonStart": "#a94dcf",
+    "buttonEnd": "#b4539d",
+    "buttonText": "#ffffff"
+  },
+  "light": {
+    "bg": "#fdf9fe",
+    "panel": "#fcf7fe",
+    "code": "#faf3fd",
+    "ink": "#211630",
+    "muted": "#695e88",
+    "line": "#ebcbf7",
+    "primary": "#a04ac5",
+    "secondary": "#ab4e96",
+    "highlight": "#796997",
+    "accent": "#a04ac5",
+    "buttonStart": "#a94dcf",
+    "buttonEnd": "#b4539d",
+    "buttonText": "#ffffff"
+  }
+}

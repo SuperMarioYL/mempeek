@@ -1,7 +1,7 @@
 {
   "name": "mempeek",
   "version": "0.1.0",
-  "description": "Zero-token memory readback for AI agents — MCP server + local dashboard.",
+  "description": "Browse recalled memories through a local dashboard while returning compact MCP receipts; SQLite storage, session filters and optional caller embeddings.",
   "type": "module",
   "license": "MIT",
   "author": "SuperMarioYL",

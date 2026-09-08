@@ -1,0 +1,78 @@
+{
+  "name": "MemPeek",
+  "tagline": "Review recalled memories locally.",
+  "architecture": {
+    "title": "MemPeek / data flow",
+    "nodes": [
+      {
+        "title": "MCP tool request",
+        "detail": "Write or readback"
+      },
+      {
+        "title": "SQLite store",
+        "detail": "Text and vectors"
+      },
+      {
+        "title": "Recall split",
+        "detail": "Receipt and full entries"
+      },
+      {
+        "title": "Dashboard SSE",
+        "detail": "Human readback"
+      }
+    ],
+    "edges": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ]
+  },
+  "process": {
+    "title": "MemPeek / example workflow",
+    "steps": [
+      {
+        "title": "Write two memories",
+        "detail": "Explicit synthetic inputs"
+      },
+      {
+        "title": "Recall one entry",
+        "detail": "Session-scoped similarity"
+      },
+      {
+        "title": "Split the result",
+        "detail": "Receipt and event content"
+      }
+    ],
+    "result": "The receipt omits the full memory text; the local event carries it."
+  },
+  "integrations": {
+    "title": "MemPeek / supported routes",
+    "items": [
+      {
+        "title": "MCP stdio",
+        "detail": "write / readback tools"
+      },
+      {
+        "title": "SQLite",
+        "detail": "Local persistent memory"
+      },
+      {
+        "title": "HTTP and SSE",
+        "detail": "Dashboard updates"
+      },
+      {
+        "title": "Caller embeddings",
+        "detail": "Optional query / entry vectors"
+      }
+    ]
+  }
+}
