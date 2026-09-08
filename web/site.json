@@ -104,6 +104,10 @@
           "alt": {
             "zh": "脚本向临时 SQLite 写入两条记忆，显式按 demo 会话召回一条，并通过进程内 SSEBus 收到全文。没有启动模型或浏览器仪表盘。token_saved 是启发式内容估算。",
             "en": "The script writes two memories to temporary SQLite, explicitly scopes recall to the demo session and delivers full text through an in-process SSEBus. It starts no model or browser dashboard. token_saved is a heuristic content estimate."
+          },
+          "mobile": {
+            "light": "/assets/presentation/process-mobile-light.svg",
+            "dark": "/assets/presentation/process-mobile-dark.svg"
           }
         }
       },
@@ -122,6 +126,10 @@
           "alt": {
             "zh": "MemoryStore 将内容与向量写入 SQLite，按 cosine 相似度召回。MCP readback 将精简条目发布到 SSEBus，仪表盘经 HTTP/SSE 接收；回执只包含 found、displayed、token_saved、side_channel。默认向量来自哈希词袋，调用方也可提供向量。",
             "en": "MemoryStore persists text and vectors in SQLite and recalls by cosine similarity. MCP readback publishes lean entries through SSEBus to the HTTP/SSE dashboard. The receipt contains found, displayed, token_saved and side_channel. Default vectors are hashed bags of words; callers can supply their own."
+          },
+          "mobile": {
+            "light": "/assets/presentation/architecture-mobile-light.svg",
+            "dark": "/assets/presentation/architecture-mobile-dark.svg"
           }
         }
       },
@@ -140,6 +148,10 @@
           "alt": {
             "zh": "默认同一进程运行 MCP stdio 与仪表盘，也可单独启用一侧。session_id 用于查询过滤，in_context 是调用方标记，不是对 Agent 实际上下文的自动探测。",
             "en": "MCP stdio and the dashboard normally share one process; either can run alone. session_id filters queries and in_context is a caller-supplied label, not automatic inspection of the agent’s actual context."
+          },
+          "mobile": {
+            "light": "/assets/presentation/integrations-mobile-light.svg",
+            "dark": "/assets/presentation/integrations-mobile-dark.svg"
           }
         }
       }
