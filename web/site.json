@@ -229,6 +229,13 @@
           "en": "Run the supplied example"
         },
         "code": "node examples/presentation-demo.mjs"
+      },
+      {
+        "title": {
+          "zh": "跑 200 轮预算对比",
+          "en": "Run the 200-turn budget demo"
+        },
+        "code": "node examples/demo-session.mjs"
       }
     ]
   },
@@ -243,6 +250,6 @@
     }
   ],
   "footer": {
-    "tag": "0.1.0 · Node.js 22+ · MIT"
+    "tag": "0.2.0 · Node.js 22+ · MIT"
   }
 }
