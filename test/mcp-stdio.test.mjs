@@ -160,6 +160,25 @@ try {
     `/api/entries returns >=10 entries from the side-channel (got ${entries.entries?.length})`,
   );
 
+  // 6. savings series — every point must carry a numeric `saved` (v0.1.0 read
+  //    a non-existent column and emitted undefined, breaking the sparkline).
+  const savings = await fetchJson(`http://127.0.0.1:${PORT}/api/savings`);
+  assert(
+    Array.isArray(savings.series) && savings.series.length >= 1,
+    `/api/savings returns a non-empty series (got ${savings.series?.length})`,
+  );
+  assert(
+    (savings.series ?? []).every(
+      (p) => typeof p.saved === "number" && Number.isFinite(p.saved) && p.saved >= 0,
+    ),
+    "every savings series point carries a numeric saved (was undefined in v0.1.0)",
+  );
+  const seriesSum = (savings.series ?? []).reduce((s, p) => s + p.saved, 0);
+  assert(
+    seriesSum === savings.total,
+    `savings series sums to total (${seriesSum} == ${savings.total})`,
+  );
+
   console.log(failures === 0 ? "\nALL CHECKS PASSED — m1 acceptance criterion met over real stdio." : `\n${failures} CHECK(S) FAILED.`);
 } catch (err) {
   failures++;

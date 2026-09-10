@@ -26,6 +26,7 @@ import {
   toLean,
   type ReadbackReceipt,
 } from "./readback.js";
+import { MEMPEEK_VERSION } from "./version.js";
 
 export interface McpServerOptions {
   sessionId: string;
@@ -118,7 +119,7 @@ const READBACK_TOOL: ToolDef = {
 /** Build (but do not connect) the MCP server. */
 export function createMcpServer(deps: ToolDeps, opts: McpServerOptions): Server {
   const server = new Server(
-    { name: "mempeek", version: "0.1.0" },
+    { name: "mempeek", version: MEMPEEK_VERSION },
     { capabilities: { tools: {} } },
   );
 

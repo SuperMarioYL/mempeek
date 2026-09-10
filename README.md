@@ -9,7 +9,7 @@
 
 **完整召回内容送到本地仪表盘，MCP 返回精简回执，让人可以检查记忆而不把全文重复塞进模型上下文。**
 
-`v0.1.0` · `Node.js 22+` · [MIT](LICENSE)
+`v0.2.0` · `Node.js 22+` · [MIT](LICENSE)
 
 [Website](https://mempeek.lei6393.com) · [Demo record](docs/demo-results.json)
 
@@ -59,6 +59,14 @@ node dist/index.js --http-only --db mempeek.db
 node dist/index.js --demo --seed 14
 ```
 仪表盘默认地址为 http://localhost:7331。MCP 客户端 command 使用 node，args 使用 dist/index.js 的绝对路径。工具 `mempeek.write` 接受 content；`mempeek.readback` 接受 query、top_k 与 session_id。需要隔离会话时，readback 应明确传 session_id。
+
+200 轮模拟会话与 before/after 上下文预算对比：
+
+```bash
+node examples/demo-session.mjs
+```
+
+输出 [docs/demo-budget.json](docs/demo-budget.json)（逐次回看的累计注入/旁路 token）与 [docs/budget-graph.svg](docs/budget-graph.svg)（两条累计曲线对比图）；`--turns`、`--every` 可调规模。
 
 ## 实际 Demo
 

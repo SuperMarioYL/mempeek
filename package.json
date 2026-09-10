@@ -1,6 +1,6 @@
 {
   "name": "mempeek",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Browse recalled memories through a local dashboard while returning compact MCP receipts; SQLite storage, session filters and optional caller embeddings.",
   "type": "module",
   "license": "MIT",
@@ -45,7 +45,7 @@
     "start": "node dist/index.js",
     "demo": "tsx src/index.ts --demo",
     "demo:record": "vhs docs/demo.tape",
-    "test": "node test/mcp-stdio.test.mjs",
+    "test": "node test/version-consistency.test.mjs && node test/cli-contracts.test.mjs && node test/demo-session.test.mjs && node test/mcp-stdio.test.mjs",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist *.db *.db-journal"
   },

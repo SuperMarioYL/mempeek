@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="380" viewBox="0 0 960 380" role="img" aria-label="Cumulative context tokens over 200 turns: injection baseline versus MemPeek side-channel">
+  <rect width="960" height="380" fill="#16161a"/>
+  <text x="80" y="28" font-family="monospace" font-size="15" fill="#e8e8ed">Context budget over 200 turns — injection vs side-channel</text>
+  <line x1="80" y1="328.0" x2="930" y2="328.0" stroke="#3a3a42" stroke-width="1"/>  <text x="70" y="332.0" text-anchor="end" font-family="monospace" font-size="12" fill="#8e8e96">0</text>
+  <line x1="80" y1="273.6" x2="930" y2="273.6" stroke="#3a3a42" stroke-width="1"/>  <text x="70" y="277.6" text-anchor="end" font-family="monospace" font-size="12" fill="#8e8e96">609</text>
+  <line x1="80" y1="219.2" x2="930" y2="219.2" stroke="#3a3a42" stroke-width="1"/>  <text x="70" y="223.2" text-anchor="end" font-family="monospace" font-size="12" fill="#8e8e96">1,219</text>
+  <line x1="80" y1="164.8" x2="930" y2="164.8" stroke="#3a3a42" stroke-width="1"/>  <text x="70" y="168.8" text-anchor="end" font-family="monospace" font-size="12" fill="#8e8e96">1,828</text>
+  <line x1="80" y1="110.4" x2="930" y2="110.4" stroke="#3a3a42" stroke-width="1"/>  <text x="70" y="114.4" text-anchor="end" font-family="monospace" font-size="12" fill="#8e8e96">2,438</text>
+  <line x1="80" y1="56.0" x2="930" y2="56.0" stroke="#3a3a42" stroke-width="1"/>  <text x="70" y="60.0" text-anchor="end" font-family="monospace" font-size="12" fill="#8e8e96">3,047</text>
+  <text x="80.0" y="350" text-anchor="middle" font-family="monospace" font-size="12" fill="#8e8e96">turn 8</text>
+  <text x="292.5" y="350" text-anchor="middle" font-family="monospace" font-size="12" fill="#8e8e96">turn 56</text>
+  <text x="505.0" y="350" text-anchor="middle" font-family="monospace" font-size="12" fill="#8e8e96">turn 104</text>
+  <text x="717.5" y="350" text-anchor="middle" font-family="monospace" font-size="12" fill="#8e8e96">turn 152</text>
+  <text x="930.0" y="350" text-anchor="middle" font-family="monospace" font-size="12" fill="#8e8e96">turn 200</text>
+
+  <polyline points="80.0,316.9 115.4,306.1 150.8,295.0 186.3,284.3 221.7,273.1 257.1,262.0 292.5,250.9 327.9,241.1 363.3,230.6 398.8,220.5 434.2,208.5 469.6,197.8 505.0,186.7 540.4,175.5 575.8,163.9 611.3,153.6 646.7,142.0 682.1,130.6 717.5,119.5 752.9,110.1 788.3,99.3 823.8,89.6 859.2,77.5 894.6,67.1 930.0,56.0" fill="none" stroke="#e5484d" stroke-width="2.5"/>
+  <polyline points="80.0,326.2 115.4,324.4 150.8,322.6 186.3,320.9 221.7,319.1 257.1,317.3 292.5,315.5 327.9,313.7 363.3,311.9 398.8,310.1 434.2,308.4 469.6,306.6 505.0,304.8 540.4,303.0 575.8,301.2 611.3,299.4 646.7,297.6 682.1,295.9 717.5,294.1 752.9,292.3 788.3,290.5 823.8,288.7 859.2,286.9 894.6,285.2 930.0,283.4" fill="none" stroke="#2dc79a" stroke-width="2.5"/>
+  <line x1="80" y1="328" x2="930" y2="328" stroke="#8e8e96" stroke-width="1.5"/>
+  <line x1="80" y1="56" x2="80" y2="328" stroke="#8e8e96" stroke-width="1.5"/>
+  <rect x="80" y="22" width="14" height="4" fill="#e5484d"/>
+  <text x="102" y="27" font-family="monospace" font-size="12" fill="#e8e8ed">injection: 3,047 tokens</text>
+  <rect x="300" y="22" width="14" height="4" fill="#2dc79a"/>
+  <text x="322" y="27" font-family="monospace" font-size="12" fill="#e8e8ed">side-channel: 500 tokens</text>
+</svg>

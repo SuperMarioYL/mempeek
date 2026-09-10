@@ -20,6 +20,7 @@ import { MemoryStore } from "./memory-store.js";
 import { SSEBus, computeReceipt, receiptToString, estimateTokens } from "./readback.js";
 import { runStdioMcp } from "./mcp-server.js";
 import { startDashboard } from "./dashboard/server.js";
+import { MEMPEEK_VERSION } from "./version.js";
 
 interface CliArgs {
   demo: boolean;
@@ -31,6 +32,24 @@ interface CliArgs {
   session: string;
   seed: number;
   help: boolean;
+  version: boolean;
+}
+
+/** Print a clean usage error and exit 2 (never a raw stack trace). */
+function usageError(message: string): never {
+  process.stderr.write(`mempeek: ${message}\n`);
+  process.exit(2);
+}
+
+/** Parse an integer CLI value; reject NaN / out-of-range with a clean error. */
+function parseIntArg(flag: string, raw: string | undefined, min: number, max: number): number {
+  const n = Number(raw);
+  if (raw === undefined || !Number.isInteger(n) || n < min || n > max) {
+    usageError(
+      `invalid value for ${flag}: ${raw ?? "(missing)"} (expected an integer ${min}-${max})`,
+    );
+  }
+  return n;
 }
 
 function parseArgs(argv: string[]): CliArgs {
@@ -44,6 +63,7 @@ function parseArgs(argv: string[]): CliArgs {
     session: "default",
     seed: 14,
     help: false,
+    version: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -52,11 +72,12 @@ function parseArgs(argv: string[]): CliArgs {
       case "--http-only": a.httpOnly = true; break;
       case "--mcp-only": a.mcpOnly = true; break;
       case "--help": case "-h": a.help = true; break;
+      case "--version": case "-V": a.version = true; break;
       case "--db": a.db = argv[++i] ?? a.db; break;
-      case "--port": a.port = Number(argv[++i] ?? a.port); break;
+      case "--port": a.port = parseIntArg("--port", argv[++i], 1, 65535); break;
       case "--host": a.host = argv[++i] ?? a.host; break;
       case "--session": a.session = argv[++i] ?? a.session; break;
-      case "--seed": a.seed = Number(argv[++i] ?? a.seed); break;
+      case "--seed": a.seed = parseIntArg("--seed", argv[++i], 1, SEED_MEMORIES.length); break;
       default:
         if (arg.startsWith("--")) {
           process.stderr.write(`mempeek: unknown flag ${arg}\n`);
@@ -66,7 +87,7 @@ function parseArgs(argv: string[]): CliArgs {
   return a;
 }
 
-const HELP = `MemPeek — zero-token memory readback (v0.1.0)
+const HELP = `MemPeek — zero-token memory readback (v${MEMPEEK_VERSION})
 
 Usage:
   mempeek                       MCP stdio server + dashboard (default)
@@ -80,6 +101,13 @@ Flags:
   --host <h>       Dashboard host (default: 127.0.0.1)
   --session <id>   Session id (default: default)
   --seed <N>       Demo seed count (default: 14)
+  --version        Print version and exit
+  --help           Show this help
+
+Exit codes:
+  0  success
+  1  runtime failure (e.g. dashboard could not start in --http-only mode)
+  2  usage error (unknown mode combination, invalid flag value)
 
 Connect your agent (Claude Code):
   /mcp add mempeek node /path/to/dist/index.js
@@ -97,6 +125,13 @@ async function main(): Promise<void> {
   if (args.help) {
     process.stdout.write(HELP);
     return;
+  }
+  if (args.version) {
+    process.stdout.write(`mempeek ${MEMPEEK_VERSION}\n`);
+    return;
+  }
+  if (args.httpOnly && args.mcpOnly) {
+    usageError("--http-only and --mcp-only are mutually exclusive");
   }
   if (args.demo) {
     await runDemo(args);
@@ -129,7 +164,12 @@ async function runServer(args: CliArgs): Promise<void> {
   const sideChannel = dashboardUrl ?? sideChannelUrl;
 
   if (!wantMcp) {
-    // http-only: keep alive
+    // http-only: the dashboard is the only service — if it failed to start
+    // there is nothing left to serve, so exit instead of hanging as a zombie.
+    if (!dashboardUrl) {
+      log(`MemPeek: fatal: dashboard failed to start; --http-only has nothing to serve. Exiting.`);
+      process.exit(1);
+    }
     log(`MemPeek running in dashboard-only mode. Ctrl+C to stop.`);
     process.on("SIGINT", () => process.exit(0));
     return;

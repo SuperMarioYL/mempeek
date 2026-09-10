@@ -270,16 +270,23 @@ export class MemoryStore {
     count: number;
     series: { ts: number; saved: number; found: number }[];
   } {
+    // NOTE: the column is `token_saved`; alias it to `saved` so the series
+    // mapping below reads a field that actually exists (v0.1.0 read `r.saved`
+    // from `SELECT *` rows and every sparkline point came out undefined).
     const seriesRows = sessionId
       ? (this.db
-          .prepare("SELECT * FROM savings WHERE session_id = ? ORDER BY ts ASC")
+          .prepare(
+            "SELECT ts, token_saved AS saved, found FROM savings WHERE session_id = ? ORDER BY ts ASC",
+          )
           .all(sessionId) as {
           ts: number;
           saved: number;
           found: number;
         }[])
       : (this.db
-          .prepare("SELECT * FROM savings ORDER BY ts ASC")
+          .prepare(
+            "SELECT ts, token_saved AS saved, found FROM savings ORDER BY ts ASC",
+          )
           .all() as { ts: number; saved: number; found: number }[]);
     const sum = sessionId
       ? (this.db

@@ -1,0 +1,136 @@
+{
+  "turns": 200,
+  "readback_every": 8,
+  "top_k": 5,
+  "readbacks": 25,
+  "injection_total": 3047,
+  "sidechannel_total": 500,
+  "saved_total": 3047,
+  "series": [
+    {
+      "turn": 8,
+      "injection_cum": 124,
+      "sidechannel_cum": 20
+    },
+    {
+      "turn": 16,
+      "injection_cum": 245,
+      "sidechannel_cum": 40
+    },
+    {
+      "turn": 24,
+      "injection_cum": 370,
+      "sidechannel_cum": 60
+    },
+    {
+      "turn": 32,
+      "injection_cum": 489,
+      "sidechannel_cum": 80
+    },
+    {
+      "turn": 40,
+      "injection_cum": 615,
+      "sidechannel_cum": 100
+    },
+    {
+      "turn": 48,
+      "injection_cum": 739,
+      "sidechannel_cum": 120
+    },
+    {
+      "turn": 56,
+      "injection_cum": 864,
+      "sidechannel_cum": 140
+    },
+    {
+      "turn": 64,
+      "injection_cum": 973,
+      "sidechannel_cum": 160
+    },
+    {
+      "turn": 72,
+      "injection_cum": 1091,
+      "sidechannel_cum": 180
+    },
+    {
+      "turn": 80,
+      "injection_cum": 1204,
+      "sidechannel_cum": 200
+    },
+    {
+      "turn": 88,
+      "injection_cum": 1339,
+      "sidechannel_cum": 220
+    },
+    {
+      "turn": 96,
+      "injection_cum": 1458,
+      "sidechannel_cum": 240
+    },
+    {
+      "turn": 104,
+      "injection_cum": 1583,
+      "sidechannel_cum": 260
+    },
+    {
+      "turn": 112,
+      "injection_cum": 1708,
+      "sidechannel_cum": 280
+    },
+    {
+      "turn": 120,
+      "injection_cum": 1838,
+      "sidechannel_cum": 300
+    },
+    {
+      "turn": 128,
+      "injection_cum": 1954,
+      "sidechannel_cum": 320
+    },
+    {
+      "turn": 136,
+      "injection_cum": 2084,
+      "sidechannel_cum": 340
+    },
+    {
+      "turn": 144,
+      "injection_cum": 2211,
+      "sidechannel_cum": 360
+    },
+    {
+      "turn": 152,
+      "injection_cum": 2336,
+      "sidechannel_cum": 380
+    },
+    {
+      "turn": 160,
+      "injection_cum": 2441,
+      "sidechannel_cum": 400
+    },
+    {
+      "turn": 168,
+      "injection_cum": 2562,
+      "sidechannel_cum": 420
+    },
+    {
+      "turn": 176,
+      "injection_cum": 2671,
+      "sidechannel_cum": 440
+    },
+    {
+      "turn": 184,
+      "injection_cum": 2806,
+      "sidechannel_cum": 460
+    },
+    {
+      "turn": 192,
+      "injection_cum": 2923,
+      "sidechannel_cum": 480
+    },
+    {
+      "turn": 200,
+      "injection_cum": 3047,
+      "sidechannel_cum": 500
+    }
+  ]
+}

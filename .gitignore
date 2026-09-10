@@ -8,6 +8,8 @@ dist/
 # local runtime artifacts
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 *.sqlite
 *.sqlite-journal
 
