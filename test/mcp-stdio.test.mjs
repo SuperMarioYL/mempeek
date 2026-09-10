@@ -187,6 +187,16 @@ try {
 } finally {
   child.stdin.end();
   child.kill("SIGTERM");
+  // SIGTERM alone is not always delivered promptly; an orphaned server keeps
+  // port 7399 and breaks the next run. Wait for exit, escalate to SIGKILL.
+  await new Promise((resolve) => {
+    if (child.exitCode !== null) return resolve();
+    const timer = setTimeout(() => {
+      child.kill("SIGKILL");
+      setTimeout(resolve, 250);
+    }, 2000);
+    child.once("exit", () => { clearTimeout(timer); resolve(); });
+  });
   // cleanup test db
   const fs = await import("node:fs");
   for (const f of ["test-mempeek.db", "test-mempeek.db-wal", "test-mempeek.db-shm"]) {
