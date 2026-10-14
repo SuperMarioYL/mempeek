@@ -270,14 +270,12 @@ function emitSnapshot(deps: ToolDeps, opts: McpServerOptions) {
     },
     ts: Date.now(),
   });
-  // also a savings event for the live counter
-  deps.bus.emit({
-    type: "savings",
-    total: s.total,
-    count: s.count,
-    lastSaved: s.series.length ? s.series[s.series.length - 1].saved : 0,
-    ts: Date.now(),
-  });
+  // NOTE: no trailing "savings" event here. The snapshot above already
+  // carries total/count/series; a follow-up savings event would repeat the
+  // last series point, which the dashboard client appends to its sparkline
+  // series — duplicating a point on every write/readback (fixed in v0.3.0).
+  // Incremental savings updates are emitted by handleReadback only, with the
+  // genuinely new receipt as lastSaved.
   // touch opts to avoid unused-var lint in callers
   void opts;
 }

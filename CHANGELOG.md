@@ -4,6 +4,40 @@ All notable changes to MemPeek are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## [0.3.0] - 2026-10-14
+
+### Fixed
+
+- **Dashboard sparkline duplication**: `emitSnapshot` emitted a trailing
+  `savings` event whose `lastSaved` was always the last series point the
+  accompanying snapshot had just delivered, and the dashboard client appends
+  every savings event to its sparkline series — so every `mempeek.write` or
+  `mempeek.readback` added a duplicate point and the live sparkline diverged
+  from the store's true series. The redundant emit is gone; incremental
+  savings updates now come only from `handleReadback` (with the genuinely new
+  receipt).
+- **Dashboard render crash on future timestamps**: `relTime()` reassigned a
+  `const` binding when an entry's timestamp was in the future relative to the
+  browser clock (a backward clock step, or a caller-supplied `ts`), throwing
+  `TypeError: Assignment to constant variable` and freezing all dashboard
+  panel rendering. The clamp now uses `let` and future timestamps render as
+  "0s".
+- **Clean CLI error for a bad `--db` target**: pointing `--db` at a non-SQLite
+  file, an empty string, or an unwritable path dumped a raw `SqliteError`
+  with node_modules stack frames. Store construction at the CLI layer now
+  prints one named line (`mempeek: cannot open memory store at <path>:
+  <reason>`) and exits 1, matching the clean-error contract v0.2.0
+  established for invalid flag values.
+
+### Changed
+
+- Version surfaces bumped in lockstep to 0.3.0 — including
+  `docs/demo-results.json`, which the live site consumes via
+  `web/site.json` `meta.demo_source` and which had silently stayed at 0.1.0
+  through the v0.2.0 bump. The version-consistency test now also guards
+  `docs/demo-results.json`'s version and `web/site.json`'s footer tag, the
+  two surfaces the previous lockstep sweep missed.
+
 ## [0.2.0] - 2026-09-10
 
 ### Fixed

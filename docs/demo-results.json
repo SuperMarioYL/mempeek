@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.3.0",
   "scope": "SQLite storage, explicit-session similarity recall and in-process SSE event delivery for two synthetic memories. No model is called; token_saved is a heuristic content estimate, not billing or net savings.",
   "inputs": [
     {

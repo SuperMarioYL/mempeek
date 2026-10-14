@@ -9,7 +9,7 @@
 
 **完整召回内容送到本地仪表盘，MCP 返回精简回执，让人可以检查记忆而不把全文重复塞进模型上下文。**
 
-`v0.2.0` · `Node.js 22+` · [MIT](LICENSE)
+`v0.3.0` · `Node.js 22+` · [MIT](LICENSE)
 
 [Website](https://mempeek.lei6393.com) · [Demo record](docs/demo-results.json)
 

@@ -34,7 +34,9 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 function relTime(ts) {
-  const d = Date.now() - ts;
+  // `let` (not `const`): a future entry ts (clock stepped backward between
+  // write and render, or a caller-supplied ts) must clamp to 0, not throw.
+  let d = Date.now() - ts;
   if (d < 0) d = 0;
   const s = Math.floor(d / 1000);
   if (s < 60) return `${s}s`;

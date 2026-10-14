@@ -7,11 +7,14 @@
 //     forever as a zombie serving nothing and exited 0 on SIGINT)
 //   - --version prints the packaged version
 //   - valid --demo invocations keep working (regression)
+// and the v0.3.0 fixes:
+//   - a bad --db target (non-SQLite file, empty string) exits 1 with one
+//     clean named error and no stack trace (v0.2.0 leaked a raw SqliteError)
 //
 // Run: node test/cli-contracts.test.mjs   (requires `npm run build` first)
 
 import { spawn, spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createServer } from "node:net";
@@ -90,7 +93,23 @@ try {
     blocker.close();
   }
 
-  // 5. regression: valid demo invocations still work
+  // 5. a bad --db target exits 1 with one clean named error (no stack trace)
+  //    (v0.2.0 leaked `mempeek: fatal: SqliteError: ...` + node_modules frames)
+  {
+    const junkDb = join(tmp, "not-a-database.db");
+    writeFileSync(junkDb, "this is definitely not a sqlite database\n");
+    for (const [label, dbValue] of [["non-SQLite file", junkDb], ["empty string", ""]]) {
+      const r = run(["--demo", "--db", dbValue]);
+      assert(r.status === 1, `--demo --db <${label}> exits 1 (got ${r.status})`);
+      assert(
+        r.stderr.includes("cannot open memory store") && r.stderr.includes("mempeek:"),
+        `--demo --db <${label}> stderr names the store failure: ${JSON.stringify((r.stderr || "").trim().split("\n")[0])}`,
+      );
+      assert(!r.stderr.includes("    at "), `--demo --db <${label}> prints no stack trace`);
+    }
+  }
+
+  // 6. regression: valid demo invocations still work
   {
     const r = run(["--demo", "--seed", "3", "--db", join(tmp, "demo.db")]);
     assert(r.status === 0, `--demo --seed 3 still exits 0 (got ${r.status})`);

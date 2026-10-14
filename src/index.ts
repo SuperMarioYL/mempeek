@@ -120,6 +120,21 @@ function log(...parts: unknown[]): void {
   process.stderr.write(parts.join(" ") + "\n");
 }
 
+/**
+ * Open the SQLite store. A bad --db target (non-SQLite file, empty string,
+ * unwritable path) is a user-input error: print one clean named line and
+ * exit 1 — never the raw SqliteError stack the constructor would throw.
+ */
+function openStore(dbPath: string, sessionId: string): MemoryStore {
+  try {
+    return new MemoryStore(dbPath, sessionId);
+  } catch (err) {
+    const reason = err instanceof Error ? err.message.split("\n")[0] : String(err);
+    process.stderr.write(`mempeek: cannot open memory store at ${dbPath}: ${reason}\n`);
+    process.exit(1);
+  }
+}
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
@@ -141,7 +156,7 @@ async function main(): Promise<void> {
 }
 
 async function runServer(args: CliArgs): Promise<void> {
-  const store = new MemoryStore(args.db, args.session);
+  const store = openStore(args.db, args.session);
   const bus = new SSEBus();
   const sideChannelUrl = `http://${args.host}:${args.port}`;
   const wantDashboard = !args.mcpOnly;
@@ -222,7 +237,7 @@ const C = {
 
 async function runDemo(args: CliArgs): Promise<void> {
   const dbPath = args.db === "mempeek.db" ? "mempeek-demo.db" : args.db;
-  const store = new MemoryStore(dbPath, args.session);
+  const store = openStore(dbPath, args.session);
 
   process.stdout.write(C.cyan("╭─ MemPeek ZTMR demo ───────────────────────────────────────────────╮\n"));
   process.stdout.write(C.dim("│  Seeding ") + C.yellow(String(args.seed)) + C.dim(" memories into a local SQLite store…") + "\n");

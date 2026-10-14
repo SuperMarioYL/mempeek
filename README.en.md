@@ -9,7 +9,7 @@
 
 **Send full recalls to a local dashboard and return compact MCP receipts, so people can review memories without repeating their full text in model context.**
 
-`v0.2.0` · `Node.js 22+` · [MIT](LICENSE)
+`v0.3.0` · `Node.js 22+` · [MIT](LICENSE)
 
 [Website](https://mempeek.lei6393.com) · [Demo record](docs/demo-results.json)
 

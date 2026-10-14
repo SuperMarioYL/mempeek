@@ -12,6 +12,7 @@
 import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 import { setTimeout as sleep } from "node:timers/promises";
+import http from "node:http";
 
 const PORT = 7399; // avoid clashing with a real session on 7331
 const child = spawn(
@@ -178,6 +179,73 @@ try {
     seriesSum === savings.total,
     `savings series sums to total (${seriesSum} == ${savings.total})`,
   );
+
+  // 7. SSE client-path regression (v0.3.0): the sparkline series the dashboard
+  //    derives from the live event stream must exactly match the store series.
+  //    emitSnapshot used to re-send the last series point as a savings event,
+  //    which the client appends (app.js savings handler) — duplicating a point
+  //    on every write/readback so the sparkline diverged from /api/savings.
+  {
+    const events = [];
+    const sseReq = http.get(`http://127.0.0.1:${PORT}/api/events`, (res) => {
+      res.setEncoding("utf8");
+      let buf = "";
+      res.on("data", (d) => {
+        buf += d;
+        let idx;
+        while ((idx = buf.indexOf("\n\n")) !== -1) {
+          const chunk = buf.slice(0, idx);
+          buf = buf.slice(idx + 2);
+          const evLine = chunk.split("\n").find((l) => l.startsWith("event: "));
+          const dataLine = chunk.split("\n").find((l) => l.startsWith("data: "));
+          if (evLine && dataLine) {
+            try {
+              events.push({ type: evLine.slice(7).trim(), data: JSON.parse(dataLine.slice(6)) });
+            } catch { /* partial frame */ }
+          }
+        }
+      });
+    });
+    sseReq.on("error", () => { /* handled via empty events below */ });
+    await sleep(400); // let the SSE connection establish + backfill snapshot arrive
+
+    const w = await send({
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: { name: "mempeek.write", arguments: { content: "SSE regression probe: sparkline duplication check entry" } },
+    });
+    const ack = JSON.parse(w?.result?.content?.[0]?.text ?? "{}");
+    assert(ack.ok === true, "SSE probe write acks ok");
+
+    const rb = await send({
+      jsonrpc: "2.0",
+      method: "tools/call",
+      params: { name: "mempeek.readback", arguments: { query: "SSE regression probe sparkline" } },
+    });
+    const probeReceipt = JSON.parse(rb?.result?.content?.[0]?.text ?? "{}");
+    assert(probeReceipt.found >= 1, `SSE probe readback finds the probe entry (found ${probeReceipt.found})`);
+    await sleep(300); // let trailing events flush
+    sseReq.destroy();
+
+    // Replay the dashboard client algorithm exactly (src/dashboard/app.js:
+    // snapshot handler replaces the series; savings handler appends lastSaved).
+    const derived = [];
+    for (const ev of events) {
+      if (ev.type === "snapshot") {
+        derived.length = 0;
+        derived.push(...(ev.data?.savings?.series ?? []));
+      } else if (ev.type === "savings") {
+        const { lastSaved, ts } = ev.data ?? {};
+        if (lastSaved && ts) derived.push({ ts, saved: lastSaved });
+      }
+    }
+    const storeSavings = await fetchJson(`http://127.0.0.1:${PORT}/api/savings`);
+    assert(
+      derived.length === storeSavings.series.length &&
+        derived.every((p, i) => p.saved === storeSavings.series[i].saved),
+      `sparkline series derived from SSE events matches the store series (client=${derived.length} points, store=${storeSavings.series.length} points — was duplicated before v0.3.0)`,
+    );
+  }
 
   console.log(failures === 0 ? "\nALL CHECKS PASSED — m1 acceptance criterion met over real stdio." : `\n${failures} CHECK(S) FAILED.`);
 } catch (err) {
