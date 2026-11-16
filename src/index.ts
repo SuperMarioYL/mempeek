@@ -158,7 +158,6 @@ async function main(): Promise<void> {
 async function runServer(args: CliArgs): Promise<void> {
   const store = openStore(args.db, args.session);
   const bus = new SSEBus();
-  const sideChannelUrl = `http://${args.host}:${args.port}`;
   const wantDashboard = !args.mcpOnly;
   const wantMcp = !args.httpOnly;
 
@@ -176,8 +175,6 @@ async function runServer(args: CliArgs): Promise<void> {
     }
   }
 
-  const sideChannel = dashboardUrl ?? sideChannelUrl;
-
   if (!wantMcp) {
     // http-only: the dashboard is the only service — if it failed to start
     // there is nothing left to serve, so exit instead of hanging as a zombie.
@@ -191,7 +188,13 @@ async function runServer(args: CliArgs): Promise<void> {
   }
 
   log(`MemPeek MCP server listening on stdio (session: ${args.session}).`);
-  await runStdioMcp({ store, bus }, { sessionId: args.session, sideChannelUrl: sideChannel });
+  if (!dashboardUrl) {
+    log(`MemPeek: no dashboard is serving, so readback receipts report displayed=false.`);
+  }
+  await runStdioMcp(
+    { store, bus },
+    { sessionId: args.session, sideChannelUrl: dashboardUrl },
+  );
 }
 
 // ---------------------------------------------------------------------------

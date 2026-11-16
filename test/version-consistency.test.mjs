@@ -10,7 +10,8 @@
 //   7. web/site.json footer.tag prefix (hand-pinned surface)
 //   8. docs/demo-results.json version (published to the live site via
 //      site.json meta.demo_source — drifted to 0.1.0 through v0.2.0)
-// plus CHANGELOG.md must carry the [0.1.0], [0.2.0] and [0.3.0] sections.
+// plus CHANGELOG.md must carry the [0.1.0], [0.2.0], [0.3.0] and [0.4.0]
+// sections.
 //
 // Run: node test/version-consistency.test.mjs   (requires `npm run build` first)
 
@@ -80,7 +81,7 @@ rmSync(TMP, { recursive: true, force: true });
 const changelog = readFileSync(join(ROOT, "CHANGELOG.md"), "utf8");
 const demoResults = JSON.parse(readFileSync(join(ROOT, "docs", "demo-results.json"), "utf8"));
 
-assert(versionFile === "0.3.0", `VERSION file is 0.3.0 (got ${versionFile})`);
+assert(versionFile === "0.4.0", `VERSION file is 0.4.0 (got ${versionFile})`);
 assert(pkg.version === versionFile, `package.json version matches VERSION file (${pkg.version} == ${versionFile})`);
 assert(lock.version === versionFile, `package-lock.json root version matches (${lock.version} == ${versionFile})`);
 assert(lock.packages?.[""]?.version === versionFile, `package-lock.json packages[""] version matches (${lock.packages?.[""]?.version})`);
@@ -98,6 +99,7 @@ assert(
 assert(changelog.includes("## [0.1.0]"), "CHANGELOG.md has a [0.1.0] section");
 assert(changelog.includes("## [0.2.0]"), "CHANGELOG.md has a [0.2.0] section");
 assert(changelog.includes("## [0.3.0]"), "CHANGELOG.md has a [0.3.0] section");
+assert(changelog.includes("## [0.4.0]"), "CHANGELOG.md has a [0.4.0] section");
 
 console.log(failures === 0 ? "\nALL VERSION-CONSISTENCY CHECKS PASSED." : `\n${failures} VERSION-CONSISTENCY CHECK(S) FAILED.`);
 process.exit(failures === 0 ? 0 : 1);

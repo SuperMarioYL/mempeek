@@ -12,6 +12,9 @@
 import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 import { setTimeout as sleep } from "node:timers/promises";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import http from "node:http";
 
 const PORT = 7399; // avoid clashing with a real session on 7331
@@ -245,6 +248,70 @@ try {
         derived.every((p, i) => p.saved === storeSavings.series[i].saved),
       `sparkline series derived from SSE events matches the store series (client=${derived.length} points, store=${storeSavings.series.length} points — was duplicated before v0.3.0)`,
     );
+  }
+
+  // 8. --mcp-only: no dashboard is serving, so the receipt must not claim the
+  //    recall was displayed and must not accrue token savings for it.
+  //    v0.3.0 returned displayed:true plus a side_channel URL where nothing
+  //    listened, and recorded token_saved as if a person had seen the recall.
+  {
+    const soloTmp = mkdtempSync(join(tmpdir(), "mempeek-solo-"));
+    const solo = spawn(
+      process.execPath,
+      ["dist/index.js", "--mcp-only", "--db", join(soloTmp, "solo.db"), "--session", "solo"],
+      { stdio: ["pipe", "pipe", "ignore"] },
+    );
+    let soloNextId = 1;
+    const soloPending = new Map();
+    createInterface({ input: solo.stdout }).on("line", (line) => {
+      if (!line.trim()) return;
+      let msg;
+      try { msg = JSON.parse(line); } catch { return; }
+      if (msg.id != null && soloPending.has(msg.id)) {
+        const { resolve } = soloPending.get(msg.id);
+        soloPending.delete(msg.id);
+        resolve(msg);
+      }
+    });
+    const soloSend = (req) => {
+      const id = soloNextId++;
+      return new Promise((resolve) => {
+        soloPending.set(id, { resolve });
+        solo.stdin.write(JSON.stringify({ ...req, id }) + "\n");
+      });
+    };
+    try {
+      await soloSend({
+        jsonrpc: "2.0",
+        method: "initialize",
+        params: { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "solo-test", version: "0" } },
+      });
+      await soloSend({
+        jsonrpc: "2.0",
+        method: "tools/call",
+        params: { name: "mempeek.write", arguments: { content: "solo mode memory: no dashboard is serving" } },
+      });
+      const soloRb = await soloSend({
+        jsonrpc: "2.0",
+        method: "tools/call",
+        params: { name: "mempeek.readback", arguments: { query: "solo mode memory" } },
+      });
+      const soloReceipt = JSON.parse(soloRb?.result?.content?.[0]?.text ?? "{}");
+      assert(Object.keys(soloReceipt).length === 4, `mcp-only receipt keeps the four-key shape (got ${Object.keys(soloReceipt).join(",")})`);
+      assert(soloReceipt.displayed === false, `mcp-only receipt reports displayed:false (got ${soloReceipt.displayed})`);
+      assert(soloReceipt.token_saved === 0, `mcp-only receipt accrues no savings (got ${soloReceipt.token_saved})`);
+      assert(soloReceipt.side_channel === "not-running", `mcp-only side_channel says not-running (got ${JSON.stringify(soloReceipt.side_channel)})`);
+      assert(soloReceipt.found >= 1, `mcp-only receipt still reports an accurate found (got ${soloReceipt.found})`);
+    } finally {
+      solo.stdin.end();
+      solo.kill("SIGTERM");
+      await new Promise((resolve) => {
+        if (solo.exitCode !== null) return resolve();
+        const timer = setTimeout(() => { solo.kill("SIGKILL"); setTimeout(resolve, 250); }, 2000);
+        solo.once("exit", () => { clearTimeout(timer); resolve(); });
+      });
+      rmSync(soloTmp, { recursive: true, force: true });
+    }
   }
 
   console.log(failures === 0 ? "\nALL CHECKS PASSED — m1 acceptance criterion met over real stdio." : `\n${failures} CHECK(S) FAILED.`);

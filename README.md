@@ -9,7 +9,7 @@
 
 **完整召回内容送到本地仪表盘，MCP 返回精简回执，让人可以检查记忆而不把全文重复塞进模型上下文。**
 
-`v0.3.0` · `Node.js 22+` · [MIT](LICENSE)
+`v0.4.0` · `Node.js 22+` · [MIT](LICENSE)
 
 [Website](https://mempeek.lei6393.com) · [Demo record](docs/demo-results.json)
 
@@ -58,7 +58,7 @@ node dist/index.js --db mempeek.db --session project-a
 node dist/index.js --http-only --db mempeek.db
 node dist/index.js --demo --seed 14
 ```
-仪表盘默认地址为 http://localhost:7331。MCP 客户端 command 使用 node，args 使用 dist/index.js 的绝对路径。工具 `mempeek.write` 接受 content；`mempeek.readback` 接受 query、top_k 与 session_id。需要隔离会话时，readback 应明确传 session_id。
+仪表盘默认地址为 http://localhost:7331。MCP 客户端 command 使用 node，args 使用 dist/index.js 的绝对路径。工具 `mempeek.write` 接受 content；`mempeek.readback` 接受 query、top_k 与 session_id。需要隔离会话时，readback 应明确传 session_id。仪表盘会给出每条记忆的前 240 字预览，并在下方“展开全文”中显示完整原文。传入的 embedding 必须是非空、元素均为有限数字的数组，且维度要与写入时一致；维度不一致会返回明确错误，而不是用截断的点积给出看似正常的排序。
 
 200 轮模拟会话与 before/after 上下文预算对比：
 
@@ -112,7 +112,7 @@ $ node examples/presentation-demo.mjs
 
 ## 配置
 
-`--db=mempeek.db`、`--port=7331`、`--host=127.0.0.1`、`--session=default` 控制运行位置。`--http-only`/`--mcp-only` 选择传输；embedding 可提供给写入与查询。回执的 displayed 标志不是浏览器已阅读或成功渲染的确认。
+`--db=mempeek.db`、`--port=7331`、`--host=127.0.0.1`、`--session=default` 控制运行位置。`--http-only`/`--mcp-only` 选择传输；embedding 可提供给写入与查询，但必须与被查询记忆的向量维度一致。回执的 `displayed` 表示当时有本地仪表盘在监听：`--mcp-only` 或仪表盘启动失败时为 false，此时 `token_saved` 为 0、`side_channel` 为 `not-running`，也不会记入节省统计。它仍不代表浏览器已渲染或有人读过内容。
 
 ## 路线图与范围
 

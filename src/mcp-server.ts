@@ -18,7 +18,8 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import type { MemoryStore } from "./memory-store.js";
+import type { MemPeekEntry, MemoryStore } from "./memory-store.js";
+import { EmbeddingDimensionError } from "./memory-store.js";
 import {
   SSEBus,
   computeReceipt,
@@ -30,7 +31,13 @@ import { MEMPEEK_VERSION } from "./version.js";
 
 export interface McpServerOptions {
   sessionId: string;
-  sideChannelUrl: string;
+  /**
+   * Where the recall side-channel is reachable, or null when no dashboard is
+   * serving. Null is not a cosmetic difference: the full recall is emitted to
+   * an SSE bus with no subscriber, so the receipt must not claim it was
+   * displayed nor accrue token savings for it.
+   */
+  sideChannelUrl: string | null;
 }
 
 export interface ToolDeps {
@@ -169,9 +176,31 @@ function err(text: string) {
   return { isError: true, content: [textBlock(text)] };
 }
 
-function asNumberArray(v: unknown): number[] | undefined {
-  if (!Array.isArray(v)) return undefined;
-  return v.map((x) => Number(x)).filter((n) => Number.isFinite(n));
+/**
+ * Validate an optional embedding argument.
+ *
+ * A JSON `number[]` is the only shape a caller can supply, and every element
+ * matters: coercing with Number() and dropping the non-finite ones silently
+ * changes the vector's dimension, which used to turn malformed input into a
+ * plausible-looking but meaningless ranking. Report a named error instead.
+ */
+function parseEmbeddingArg(
+  field: string,
+  value: unknown,
+): { embedding?: number[]; error?: string } {
+  if (value === undefined || value === null) return {};
+  if (!Array.isArray(value)) {
+    return { error: `${field} must be an array of numbers` };
+  }
+  if (value.length === 0) {
+    return { error: `${field} must not be empty` };
+  }
+  for (let i = 0; i < value.length; i++) {
+    if (typeof value[i] !== "number" || !Number.isFinite(value[i])) {
+      return { error: `${field}[${i}] is not a finite number` };
+    }
+  }
+  return { embedding: value as number[] };
 }
 
 function handleWrite(
@@ -183,7 +212,11 @@ function handleWrite(
   if (!content) {
     return err("mempeek.write requires non-empty `content`.");
   }
-  const embedding = asNumberArray(args.embedding);
+  const parsedEmbedding = parseEmbeddingArg("embedding", args.embedding);
+  if (parsedEmbedding.error) {
+    return err(`mempeek.write: ${parsedEmbedding.error}`);
+  }
+  const embedding = parsedEmbedding.embedding;
   const in_context = args.in_context === true;
   const session_id = typeof args.session_id === "string" ? args.session_id : undefined;
   const id = typeof args.id === "string" ? args.id : undefined;
@@ -219,17 +252,33 @@ function handleReadback(
   if (!query) {
     return err("mempeek.readback requires non-empty `query`.");
   }
-  const embedding = asNumberArray(args.embedding);
+  const embedding = parseEmbeddingArg("embedding", args.embedding);
+  if (embedding.error) {
+    return err(`mempeek.readback: ${embedding.error}`);
+  }
   const top_k =
     typeof args.top_k === "number" && args.top_k >= 1
       ? Math.min(Math.floor(args.top_k), 100)
       : 10;
   const session_id = typeof args.session_id === "string" ? args.session_id : undefined;
 
-  const { entries } = deps.store.readback(query, { topK: top_k, embedding, sessionId: session_id });
+  let entries: MemPeekEntry[];
+  try {
+    ({ entries } = deps.store.readback(query, {
+      topK: top_k,
+      embedding: embedding.embedding,
+      sessionId: session_id,
+    }));
+  } catch (e) {
+    // A vector from another provider cannot be compared with the stored ones;
+    // say so instead of returning a ranking built on a truncated dot product.
+    if (e instanceof EmbeddingDimensionError) return err(`mempeek.readback: ${e.message}`);
+    throw e;
+  }
+  const displayed = opts.sideChannelUrl !== null;
   const receipt: ReadbackReceipt = computeReceipt(entries, {
-    displayed: true,
-    sideChannel: opts.sideChannelUrl,
+    displayed,
+    sideChannel: opts.sideChannelUrl ?? "not-running",
   });
 
   // The full recall → side-channel (dashboard). Never enters the model context.
@@ -240,15 +289,20 @@ function handleReadback(
     receipt,
     ts: Date.now(),
   });
-  // Record savings for the live counter + sparkline.
-  deps.store.recordSavings(session_id ?? opts.sessionId, receipt.found, receipt.token_saved);
-  deps.bus.emit({
-    type: "savings",
-    total: deps.store.savings(session_id).total,
-    count: deps.store.savings(session_id).count,
-    lastSaved: receipt.token_saved,
-    ts: Date.now(),
-  });
+  // Record savings only when a dashboard could actually display the recall:
+  // an undisplaced recall saves the human nothing and must not inflate the
+  // counter.
+  if (displayed) {
+    deps.store.recordSavings(session_id ?? opts.sessionId, receipt.found, receipt.token_saved);
+    const savings = deps.store.savings(session_id);
+    deps.bus.emit({
+      type: "savings",
+      total: savings.total,
+      count: savings.count,
+      lastSaved: receipt.token_saved,
+      ts: Date.now(),
+    });
+  }
   emitSnapshot(deps, opts);
 
   // The model receives ONLY the constant-size receipt.

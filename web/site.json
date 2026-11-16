@@ -10,8 +10,9 @@
   },
   "meta": {
     "visual_profile": "neon-particle",
-    "content_version": "0.3.0",
-    "demo_source": "docs/demo-results.json"
+    "content_version": "0.4.0",
+    "demo_source": "docs/demo-results.json",
+    "generated_at": "2026-11-17T00:00:00Z"
   },
   "hero": {
     "eyebrow": {
@@ -52,8 +53,8 @@
         "en": "Human-readable recall"
       },
       "body": {
-        "zh": "全文走本地显示路径。",
-        "en": "Full text follows the local display route."
+        "zh": "全文走本地显示路径；超过 240 字的记忆可展开查看完整原文。",
+        "en": "Full text follows the local display route; memories longer than 240 characters expand to the complete original."
       }
     },
     {
@@ -117,15 +118,15 @@
           "en": "How it works"
         },
         "body": {
-          "zh": "MemoryStore 将内容与向量写入 SQLite，按 cosine 相似度召回。MCP readback 将精简条目发布到 SSEBus，仪表盘经 HTTP/SSE 接收；回执只包含 found、displayed、token_saved、side_channel。默认向量来自哈希词袋，调用方也可提供向量。",
-          "en": "MemoryStore persists text and vectors in SQLite and recalls by cosine similarity. MCP readback publishes lean entries through SSEBus to the HTTP/SSE dashboard. The receipt contains found, displayed, token_saved and side_channel. Default vectors are hashed bags of words; callers can supply their own."
+          "zh": "MemoryStore 将内容与向量写入 SQLite，按 cosine 相似度召回。MCP readback 将精简条目发布到 SSEBus，仪表盘经 HTTP/SSE 接收；回执只包含 found、displayed、token_saved、side_channel。默认向量来自哈希词袋，调用方也可提供向量，但维度必须与被查询的记忆一致，不一致会返回明确错误。",
+          "en": "MemoryStore persists text and vectors in SQLite and recalls by cosine similarity. MCP readback publishes lean entries through SSEBus to the HTTP/SSE dashboard. The receipt contains found, displayed, token_saved and side_channel. Default vectors are hashed bags of words; callers can supply their own, but the dimension must match the stored vectors or recall reports an error."
         },
         "image": {
           "light": "/assets/presentation/architecture-light.svg",
           "dark": "/assets/presentation/architecture-dark.svg",
           "alt": {
-            "zh": "MemoryStore 将内容与向量写入 SQLite，按 cosine 相似度召回。MCP readback 将精简条目发布到 SSEBus，仪表盘经 HTTP/SSE 接收；回执只包含 found、displayed、token_saved、side_channel。默认向量来自哈希词袋，调用方也可提供向量。",
-            "en": "MemoryStore persists text and vectors in SQLite and recalls by cosine similarity. MCP readback publishes lean entries through SSEBus to the HTTP/SSE dashboard. The receipt contains found, displayed, token_saved and side_channel. Default vectors are hashed bags of words; callers can supply their own."
+            "zh": "MemoryStore 将内容与向量写入 SQLite，按 cosine 相似度召回。MCP readback 将精简条目发布到 SSEBus，仪表盘经 HTTP/SSE 接收；回执只包含 found、displayed、token_saved、side_channel。默认向量来自哈希词袋，调用方也可提供向量，但维度必须与被查询的记忆一致，不一致会返回明确错误。",
+            "en": "MemoryStore persists text and vectors in SQLite and recalls by cosine similarity. MCP readback publishes lean entries through SSEBus to the HTTP/SSE dashboard. The receipt contains found, displayed, token_saved and side_channel. Default vectors are hashed bags of words; callers can supply their own, but the dimension must match the stored vectors or recall reports an error."
           },
           "mobile": {
             "light": "/assets/presentation/architecture-mobile-light.svg",
@@ -173,8 +174,8 @@
           "en": "Configuration"
         },
         "body": {
-          "zh": "`--db=mempeek.db`、`--port=7331`、`--host=127.0.0.1`、`--session=default` 控制运行位置。`--http-only`/`--mcp-only` 选择传输；embedding 可提供给写入与查询。回执的 displayed 标志不是浏览器已阅读或成功渲染的确认。",
-          "en": "`--db=mempeek.db`, `--port=7331`, `--host=127.0.0.1` and `--session=default` control runtime placement. `--http-only`/`--mcp-only` select transports. Embeddings can be supplied to writes and queries. The receipt’s displayed flag is not an acknowledgement that a browser rendered or a person read the content."
+          "zh": "`--db=mempeek.db`、`--port=7331`、`--host=127.0.0.1`、`--session=default` 控制运行位置。`--http-only`/`--mcp-only` 选择传输；embedding 可提供给写入与查询，但必须与被查询记忆的维度一致。回执的 displayed 表示当时有本地仪表盘在监听：--mcp-only 或仪表盘启动失败时为 false，此时 token_saved 为 0、side_channel 为 not-running，也不计入节省。它仍不代表浏览器已渲染或有人读过。",
+          "en": "`--db=mempeek.db`, `--port=7331`, `--host=127.0.0.1` and `--session=default` control runtime placement. `--http-only`/`--mcp-only` select transports. Embeddings can be supplied to writes and queries but must match the dimension of the stored vectors. The receipt’s displayed flag reports whether a local dashboard was listening: it is false under --mcp-only or when the dashboard failed to start, with token_saved 0, side_channel not-running and nothing added to the savings total. It still does not mean a browser rendered or a person read the content."
         }
       }
     ]
@@ -247,9 +248,13 @@
     {
       "zh": "默认哈希向量不是语义模型；未传 session_id 的召回可能遍历多个会话。",
       "en": "The default hashed vectorizer is not a semantic model; recall without session_id can span multiple sessions."
+    },
+    {
+      "zh": "在 --mcp-only 或仪表盘未启动时，回执的 displayed 为 false、token_saved 为 0——没有展示就不计入节省。",
+      "en": "Under --mcp-only, or when the dashboard is not running, the receipt reports displayed:false and token_saved:0 — an undisplaced recall adds nothing to the savings total."
     }
   ],
   "footer": {
-    "tag": "0.3.0 · Node.js 22+ · MIT"
+    "tag": "0.4.0 · Node.js 22+ · MIT"
   }
 }

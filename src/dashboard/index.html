@@ -63,6 +63,14 @@
     .row { padding: 10px 12px; border-radius: 10px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start; }
     .row:hover { background: var(--bg-soft); }
     .row .content { font-size: 13px; color: var(--text); line-height: 1.45; word-break: break-word; }
+    .row details.full { margin-top: 4px; }
+    .row details.full summary { cursor: pointer; font-size: 11px; color: var(--primary); list-style: none; user-select: none; }
+    .row details.full summary::-webkit-details-marker { display: none; }
+    .row details.full summary::before { content: "▸ "; }
+    .row details.full[open] summary::before { content: "▾ "; }
+    .row details.full[open] .toggle-more { display: none !important; }
+    .row details.full:not([open]) .toggle-less { display: none !important; }
+    .row .full-text { font-size: 13px; color: var(--text); line-height: 1.45; word-break: break-word; white-space: pre-wrap; margin-top: 4px; padding: 8px 10px; background: var(--bg-soft); border-radius: 8px; }
     .row .meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; align-items: center; margin-top: 4px; }
     .row .score { font-family: var(--mono); font-size: 11px; color: var(--teal); }
     .badge { font-size: 10px; padding: 1px 7px; border-radius: 999px; border: 1px solid; }

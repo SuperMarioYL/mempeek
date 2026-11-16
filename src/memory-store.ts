@@ -83,6 +83,30 @@ export function cosine(a: Float32Array, b: Float32Array): number {
   return dot;
 }
 
+/**
+ * Raised when a query vector cannot be compared with the stored vectors.
+ *
+ * A vector from a different embedding provider has a different dimension, and
+ * a dot product over their shared prefix is not a cosine similarity (neither
+ * vector is normalized over that prefix). Returning prefix scores would look
+ * like a normal ranking while being meaningless, so readback refuses instead.
+ */
+export class EmbeddingDimensionError extends Error {
+  readonly queryDim: number;
+  readonly storedDims: number[];
+
+  constructor(queryDim: number, storedDims: number[]) {
+    super(
+      `embedding dimension mismatch: query has ${queryDim} dim${queryDim === 1 ? "" : "s"} ` +
+        `but stored entries have ${storedDims.join("/")} — pass a query embedding ` +
+        `from the same provider that wrote the entries`,
+    );
+    this.name = "EmbeddingDimensionError";
+    this.queryDim = queryDim;
+    this.storedDims = storedDims;
+  }
+}
+
 /** Serialize a Float32Array to a Buffer for SQLite BLOB storage. */
 function embeddingToBuffer(e: Float32Array): Buffer {
   return Buffer.from(e.buffer, e.byteOffset, e.byteLength);
@@ -183,6 +207,7 @@ export class MemoryStore {
         `INSERT INTO entries (id, session_id, content, embedding, ts, in_context)
          VALUES (@id, @session_id, @content, @embedding, @ts, @in_context)
          ON CONFLICT(id) DO UPDATE SET
+           session_id=excluded.session_id,
            content=excluded.content,
            embedding=excluded.embedding,
            ts=excluded.ts,
@@ -203,6 +228,10 @@ export class MemoryStore {
    * Query the store by cosine similarity. Returns the top-k entries ranked by
    * similarity to `queryEmbedding` (or a locally-derived embedding from
    * `query` text when no embedding is supplied).
+   *
+   * Only entries whose embedding has the query's dimension are scored. If the
+   * store has entries but none of them match, this throws
+   * EmbeddingDimensionError rather than ranking by a truncated dot product.
    */
   readback(
     query: string,
@@ -222,9 +251,15 @@ export class MemoryStore {
       : (this.db
           .prepare("SELECT * FROM entries ORDER BY ts DESC")
           .all() as EntryRow[]);
-    const scored = rows
-      .map((r) => ({ entry: rowToEntry(r), score: cosine(qEmb, r.embedding ? bufferToEmbedding(r.embedding) : new Float32Array(0)) }))
-      .filter((x) => Number.isFinite(x.score))
+    const comparable = rows
+      .map(rowToEntry)
+      .filter((entry) => entry.embedding.length === qEmb.length);
+    if (rows.length > 0 && comparable.length === 0) {
+      const storedDims = [...new Set(rows.map((r) => r.embedding.length / 4))];
+      throw new EmbeddingDimensionError(qEmb.length, storedDims);
+    }
+    const scored = comparable
+      .map((entry) => ({ entry, score: cosine(qEmb, entry.embedding) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, topK)
       .map((x) => x.entry);

@@ -9,7 +9,7 @@
 
 **Send full recalls to a local dashboard and return compact MCP receipts, so people can review memories without repeating their full text in model context.**
 
-`v0.3.0` · `Node.js 22+` · [MIT](LICENSE)
+`v0.4.0` · `Node.js 22+` · [MIT](LICENSE)
 
 [Website](https://mempeek.lei6393.com) · [Demo record](docs/demo-results.json)
 
@@ -58,7 +58,7 @@ node dist/index.js --db mempeek.db --session project-a
 node dist/index.js --http-only --db mempeek.db
 node dist/index.js --demo --seed 14
 ```
-The dashboard defaults to http://localhost:7331. Configure an MCP client with command node and an absolute dist/index.js path in args. mempeek.write accepts content; mempeek.readback accepts query, top_k and session_id. Supply session_id explicitly when recall must be scoped.
+The dashboard defaults to http://localhost:7331. Configure an MCP client with command node and an absolute dist/index.js path in args. mempeek.write accepts content; mempeek.readback accepts query, top_k and session_id. Supply session_id explicitly when recall must be scoped. The dashboard shows a 240-character preview per memory with a "show full text" expander for the complete original. A supplied embedding must be a non-empty array of finite numbers whose dimension matches the vectors it is compared with; a mismatch is reported as an error instead of producing a plausible-looking ranking from a truncated dot product.
 
 A 200-turn simulated session with the before/after context-budget comparison:
 
@@ -112,7 +112,7 @@ MCP stdio and the dashboard normally share one process; either can run alone. se
 
 ## Configuration
 
-`--db=mempeek.db`, `--port=7331`, `--host=127.0.0.1` and `--session=default` control runtime placement. `--http-only`/`--mcp-only` select transports. Embeddings can be supplied to writes and queries. The receipt’s displayed flag is not an acknowledgement that a browser rendered or a person read the content.
+`--db=mempeek.db`, `--port=7331`, `--host=127.0.0.1` and `--session=default` control runtime placement. `--http-only`/`--mcp-only` select transports. Embeddings can be supplied to writes and queries, but must share the dimension of the vectors they are compared with. The receipt's `displayed` flag reports whether a local dashboard was listening: it is false under `--mcp-only` or when the dashboard failed to start, in which case `token_saved` is 0, `side_channel` is `not-running`, and nothing is added to the savings total. It still does not mean a browser rendered or a person read the content.
 
 ## Roadmap and scope
 

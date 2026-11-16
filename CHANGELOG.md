@@ -4,6 +4,46 @@ All notable changes to MemPeek are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 semantic versioning.
 
+## [0.4.0] - 2026-11-17
+
+### Fixed
+
+- **Embedding contract**: `mempeek.write`/`mempeek.readback` coerced a supplied
+  embedding with `Number()` and dropped non-finite elements, so
+  `[0.5,"abc",0.25]` silently became a two-element vector and `[]` was
+  accepted as a "provided" embedding. `cosine()` then compared only
+  `min(len(a), len(b))` elements, so a vector from a different provider (for
+  example a 1536-dim query against 128-dim fallback rows) was ranked by an
+  unnormalized prefix with no error — recall degenerated to newest-first with
+  an invented similarity. Supplied embeddings are now validated (non-empty,
+  every element a finite number) and readback scores only same-dimension
+  entries, reporting `embedding dimension mismatch` instead of a false ranking.
+- **Session id lost on upsert**: `write()` upserted by id but its conflict
+  branch never updated `session_id` while still returning the requested session
+  in the ack. Rewriting an existing id under another session therefore
+  acknowledged the new session while the row stayed in the old one, and a
+  session-scoped readback silently missed it. The upsert now moves the row.
+- **Dashboard cut every memory at 240 characters**: the dashboard is the only
+  surface where a human reads recalled content, yet `rowHtml` rendered
+  `truncate(entry.content, 240)` and no view, tooltip or API exposed the rest.
+  Long memories are now fully readable through a localized "show full text"
+  expander while the compact preview stays.
+- **Receipt claimed a display that did not exist**: under `--mcp-only`, or when
+  the dashboard failed to start (e.g. port in use), readback still returned
+  `displayed:true` with a `side_channel` URL where nothing listened, and
+  recorded `token_saved` as if the recall had been shown. Receipts now report
+  `displayed:false`, `token_saved:0` and `side_channel:"not-running"` in that
+  state and record no savings.
+
+### Changed
+
+- Version surfaces bumped in lockstep to 0.4.0 — `VERSION`, `package.json`,
+  `package-lock.json`, `web/site.json` `meta.content_version` and `footer.tag`,
+  `docs/demo-results.json`, and both README badges. The test suite gained the
+  `embedding-contract`, `store-contracts` and `dashboard-render` suites (127
+  assertions) and the stdio end-to-end test now covers the `--mcp-only` receipt
+  contract.
+
 ## [0.3.0] - 2026-10-14
 
 ### Fixed

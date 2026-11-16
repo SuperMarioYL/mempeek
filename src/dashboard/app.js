@@ -50,6 +50,23 @@ function truncate(s, n = 240) {
   return s.length > n ? s.slice(0, n) + "…" : s;
 }
 
+// The dashboard is where a human reads the recalled content (the model only
+// gets a receipt), so a long memory must never be cut off with no way to see
+// the rest. Keep the compact preview, and render the complete escaped text in
+// a collapsible element when the memory is longer than the preview.
+function entryContentHtml(content) {
+  const preview = `<div class="content">${escapeHtml(truncate(content))}</div>`;
+  if (content.length <= 240) return preview;
+  return `${preview}
+    <details class="full">
+      <summary>
+        <span class="toggle-more" data-zh>展开全文</span><span class="toggle-more" data-en>show full text</span>
+        <span class="toggle-less" data-zh>收起</span><span class="toggle-less" data-en>collapse</span>
+      </summary>
+      <div class="full-text">${escapeHtml(content)}</div>
+    </details>`;
+}
+
 // ---- state ----
 let allEntries = [];     // newest first
 let inContextIds = new Set();
@@ -67,7 +84,7 @@ function rowHtml(entry, opts = {}) {
   const score = opts.score != null ? `<span class="score">sim ${opts.score.toFixed(3)}</span>` : "";
   return `<div class="row${flash}" data-id="${escapeHtml(entry.id)}">
     <div>
-      <div class="content">${escapeHtml(truncate(entry.content))}</div>
+      ${entryContentHtml(entry.content)}
       <div class="meta">
         <span>${escapeHtml(entry.session_id || "default")}</span>
         <span>·</span>
